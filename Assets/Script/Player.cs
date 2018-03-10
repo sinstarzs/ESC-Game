@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class Player : MonoBehaviour 
+using UnityEngine.Networking;
+public class Player : NetworkBehaviour
 {
 	private float inputDirection;	// x-value of MoveVector
 	private float verticalVelocity;	// y-value of MoveVector
@@ -15,15 +15,38 @@ public class Player : MonoBehaviour
 	private Vector3 moveVector;		// (float,float,float) value
 	private CharacterController controller;
 
+	public override void OnStartLocalPlayer()
+	{
+		GetComponent<MeshRenderer>().material.color = Color.blue;
+		Invoke ("ReactivateCam", 0.5f);
+	}
+
+	void ReactivateCam(){
+		this.gameObject.GetComponentInChildren<Camera> ().enabled = false;
+		this.gameObject.GetComponentInChildren<Camera> ().enabled = true;
+	}
+
 
 	// Use this for initialization
 	void Start () {
 		controller = GetComponent<CharacterController> ();
+		if (isLocalPlayer) {
+			this.transform.GetChild (0).gameObject.GetComponent<Camera> ().enabled = true;
+		} else {
+
+			this.transform.GetChild (0).gameObject.GetComponent<Camera> ().enabled = false;
+		}
+
 	}
 	
 	// Update is called once per frame
 	void Update () 
-	{
+	{	
+		if (!isLocalPlayer)
+		{
+			return;
+		}
+
 		inputDirection = Input.GetAxis ("Horizontal")*speed;
 
 		if (isControllerGrounded())	// while grounded
@@ -106,4 +129,8 @@ public class Player : MonoBehaviour
 			break;
 		}
 	}
+
+
+
+
 }
